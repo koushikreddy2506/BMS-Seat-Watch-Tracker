@@ -1,46 +1,120 @@
-# Seat Watch
+# 🎟️ BMS Seat Watch Tracker
 
-**Housefull isn't the end.** After a show sells out on BookMyShow, the best seats often come back: blocks the
-cinema held back, bookings nobody paid for, cancellations. They're usually gone within minutes. Seat Watch keeps
-checking, sends your phone an alert the moment seats open, and can hold them up to the payment page while you pay
-from your own UPI app.
+<h3 align="center"><i>Automated BookMyShow seat alerts and auto-hold for Hyderabad cinemas</i></h3>
 
-Built for Hyderabad cinemas. A private tool, not affiliated with BookMyShow.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.12%2B-blue?style=for-the-badge&logo=python" alt="Python 3.12+">
+  <img src="https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows" alt="Windows Platform">
+  <img src="https://img.shields.io/badge/Notifications-ntfy.sh-orange?style=for-the-badge" alt="ntfy notifications">
+</p>
 
-## What's in here
+> **Note:** *Housefull isn't the end.* When a show sells out on BookMyShow, held-back blocks, unpaid bookings, and cancellations frequently reappear. Seat Watch continuously monitors shows, sends instant push alerts to your phone, and can auto-hold seats up to the payment screen.
 
-| File | What it does |
-| --- | --- |
-| `bms_server.py` | The website: landing page, movie and cinema browser, seat-map picker, watches, auto-hold requests, group bookings, admin page. Checks BookMyShow over plain HTTP within a request budget. |
-| `bms_seat_watch.py` | The watcher and shared parsing (cinema pages, date strips, show changes). |
-| `seat_holder.py` | The holder: in a logged-in Chrome, picks the best seats together and stops at the payment page. |
-| `seat_maps.py`, `seat_layout.py`, `seat_capture.py`, `seat_decode_probe.py` | Reading BookMyShow seat layouts. |
-| `start_site.py` | Keeps the website and the Cloudflare tunnel running. |
-| `start_all.bat` / `stop_all.bat` | Start or stop everything on Windows. |
-| `watch_config.example.json` | Settings template: copy it to `watch_config.json` and fill in your own values. |
+---
 
-## Setup (Windows)
+## 📌 Table of Contents
 
-1. Install Python 3.12+, Google Chrome and [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).
-2. In the project folder:
-   ```bat
-   python -m venv .venv
-   .venv\Scripts\pip install -r requirements.txt
-   .venv\Scripts\playwright install chromium
-   ```
-3. Copy `watch_config.example.json` to `watch_config.json`. Set your own private ntfy topics (long, unguessable
-   names) and your tunnel's hostname.
-4. Install the free [ntfy](https://ntfy.sh) app on your phone and subscribe to your topic.
-5. Run `start_all.bat`. The admin link (with its key) is printed in the website's console the first time it starts.
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Repository Architecture](#-repository-architecture)
+- [Prerequisites](#-prerequisites)
+- [Setup & Installation](#-setup--installation)
+- [Usage Guide](#-usage-guide)
+- [Ground Rules & Safety](#-ground-rules--safety)
+- [License](#-license)
 
-`holder.armed` is `false` in the example: the holder then only finds seats and reports what it would hold.
-Set it to `true` only when you want real holds on your BookMyShow account.
+---
 
-## Ground rules the code keeps
+## 🔍 Overview
 
-- **Gentle on BookMyShow.** Every request goes through one budget (at most 30 a minute, one at a time). A refusal
-  pauses everything and alerts the owner. Posters and release dates come from TMDB or Wikipedia, never BookMyShow.
-- **Nothing is booked without a person.** Holds stop at the payment page. Payment is always made by the person
-  in their own UPI app; the code never enters card details or OTPs.
-- **Secrets stay local.** `watch_config.json`, the database, tokens, keys, logs, captures and the Chrome profile
-  are in `.gitignore`.
+Seat Watch is a private utility built specifically for movie enthusiasts tracking cinema seats in **Hyderabad**. It consists of a local web server interface, automated polling mechanisms, and a browser automation runner to secure ticket holds.
+
+#### Why Seat Watch?
+1. **Instant Notifications:** Get alerted the second seat blocks open up.
+2. **Auto-Hold Capability:** Hold seats automatically in a real browser session so you never miss out while navigating.
+3. **Privacy First:** Payment and sensitive credentials remain strictly under manual human control.
+
+---
+
+## ⚡ Key Features
+
+##### 1. Intelligent Seat Monitoring
+* Continuously polls BookMyShow layout APIs within rate limits.
+* Parses seat categories, price bands, and contiguous group availability.
+
+##### 2. Instant Phone Alerts
+* Integrates seamlessly with [ntfy](https://ntfy.sh) for instant push notifications on iOS and Android.
+
+##### 3. Automated Hold Engine
+* Powered by Playwright and logged-in Chrome instances.
+* Selects optimal seats together and pauses at the final payment gateway.
+
+##### 4. Self-Hosted Dashboard & Tunnel
+* Web management dashboard (`bms_server.py`) paired with Cloudflare Tunnels (`cloudflared`) for secure remote access.
+
+---
+
+## 📁 Repository Architecture
+
+| File / Component | Purpose & Description |
+| :--- | :--- |
+| `bms_server.py` | Core web server: UI landing page, show selector, group booking rules, and admin interface. |
+| `bms_seat_watch.py` | Background watcher engine & shared parsing logic (cinemas, dates, show changes). |
+| `seat_holder.py` | Playwright browser runner for holding seats in a logged-in Chrome profile. |
+| `seat_maps.py` / `seat_layout.py` | Layout decoding, coordinate mapping, and seat grid processing logic. |
+| `seat_capture.py` / `seat_decode_probe.py` | Low-level layout capture and API response probe utilities. |
+| `start_site.py` | Watchdog script maintaining web server and Cloudflare Tunnel runtime. |
+| `start_all.bat` / `stop_all.bat` | Windows batch control scripts for multi-process management. |
+| `watch_config.example.json` | Configuration blueprint for topics, domain hosts, and thresholds. |
+
+---
+
+## 🛠️ Prerequisites
+
+###### Mandatory System Requirements:
+* **Operating System:** Windows 10/11
+* **Runtime:** Python `3.12+`
+* **Browser:** Google Chrome (installed at standard paths)
+* **Tunnel Client:** [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/) CLI tool
+
+---
+
+## 🚀 Setup & Installation
+
+###### Step 1: Clone & Navigate
+```bash
+git clone [https://github.com/koushikreddy2506/BMS-Seat-Watch-Tracker.git](https://github.com/koushikreddy2506/BMS-Seat-Watch-Tracker.git)
+cd BMS-Seat-Watch-Tracker
+Step 2: Create Environment & Install Dependencies
+DOS
+python -m venv .venv
+.venv\Scripts\pip install -r requirements.txt
+.venv\Scripts\playwright install chromium
+Step 3: Configure Settings
+Copy watch_config.example.json to watch_config.json and edit your preferences:
+
+DOS
+copy watch_config.example.json watch_config.json
+Step 4: Configure Push Notifications
+Install the free ntfy app on your phone (Android / iOS).
+
+Subscribe to your unique topic name configured in watch_config.json.
+
+🎮 Usage Guide
+Starting the Services
+Run the bundled batch file to launch the server, watcher, and Cloudflare tunnel simultaneously:
+
+DOS
+start_all.bat
+The first launch will output an Admin Access Key in the website console logs.
+
+Open the local or tunneled URL to set up target movies and cinema screens.
+
+Stopping the Services
+To terminate all active processes cleanly:
+
+DOS
+stop_all.bat
+🛡️ Ground Rules & Safety
+📄 License
+This project is for private educational and personal use only. Not affiliated with, maintained by, or endorsed by BookMyShow.

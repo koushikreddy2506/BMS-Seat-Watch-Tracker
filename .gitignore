@@ -1,0 +1,24 @@
+*.db
+*.log
+*.csv
+watch_state.json
+watch_state.lock
+stop.flag
+captures/
+chrome-profile/
+.venv/
+__pycache__/
+graphify-out/
+holds.json
+ntfy_token.txt
+holder_status.json
+backups/
+holder_local.key
+warm_venues.json
+warm_qty.json
+# private: your topics, tunnel and holder settings (copy watch_config.example.json)
+watch_config.json
+# runtime state
+pay_decisions.json
+pay_pending.json
+*.key
